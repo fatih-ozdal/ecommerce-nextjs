@@ -5,11 +5,14 @@ import { usePathname, useRouter } from "next/navigation";
 export default function BackButton() {
   const pathname = usePathname();
   const router = useRouter();
-
-  if (pathname === "/") return null;
+  const isHome = pathname === "/";
 
   return (
-    <button onClick={() => router.back()}>
+    <button
+      onClick={() => { if (!isHome) router.back(); }}
+      disabled={isHome}
+      aria-disabled={isHome}
+    >
       Go Back
     </button>
   );

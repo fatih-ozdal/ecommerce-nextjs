@@ -21,21 +21,27 @@ export default async function Header() {
 
   return (
     <header style={{
-      display: "flex",
+      display: "grid",
+      gridTemplateColumns: "1fr auto 1fr",
       alignItems: "center",
-      justifyContent: "space-between",
       padding: "12px 24px",
       backgroundColor: "#111",
       borderBottom: "1px solid #333",
     }}>
-      <Link href="/" style={{ display: "flex", alignItems: "center" }}>
+      {/* Left: Go Back */}
+      <div style={{ display: "flex", alignItems: "center" }}>
+        <BackButton />
+      </div>
+
+      {/* Center: Logo */}
+      <Link href="/" style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
         <Image src="/logo.png" alt="Fatihbaba" height={40} width={160} style={{ objectFit: "contain" }} />
       </Link>
 
-      <nav style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-        <BackButton />
+      {/* Right: Auth/nav */}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end" }}>
         <AuthBar session={session} callbackUrl="/" />
-      </nav>
+      </div>
     </header>
   );
 }

@@ -16,7 +16,6 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Fatihbaba | E-Commerce",
   description: "An e-commerce platform built with Next.js and MongoDB",
-  icons: { icon: "/favicon.ico" },
 };
 
 export default function RootLayout({
