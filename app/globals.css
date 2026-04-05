@@ -33,6 +33,23 @@ button:disabled {
   cursor: not-allowed;
 }
 
+/* Item card — whole card is a clickable link */
+.item-card {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  border: 1px solid #333;
+  border-radius: 8px;
+  overflow: hidden;
+  transition: border-color 0.15s, transform 0.15s;
+  cursor: pointer;
+}
+
+.item-card:hover {
+  border-color: #666;
+  transform: translateY(-2px);
+}
+
 /* Nav buttons and links that look like buttons */
 .nav-btn {
   display: inline-block;

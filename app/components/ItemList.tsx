@@ -38,23 +38,37 @@ const CATEGORIES = [
 ];
 
 function ItemCard({ item }: { item: Item }) {
+  const ratingDisplay = item.numRatings > 0 ? item.rating.toFixed(1) : "—";
+
   return (
-    <div style={{ border: "1px solid #ccc", padding: "12px", borderRadius: "6px" }}>
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src={item.image}
-        alt={item.name}
-        style={{ width: "100%", height: "180px", objectFit: "cover", borderRadius: "4px" }}
-      />
-      <h3 style={{ margin: "8px 0 4px" }}>{item.name}</h3>
-      <p style={{ margin: "2px 0" }}>Category: {item.category}</p>
-      <p style={{ margin: "2px 0" }}>Price: {item.currency}{item.price}</p>
-      <p style={{ margin: "2px 0" }}>Condition: {item.condition}</p>
-      <p style={{ margin: "2px 0" }}>Rating: {item.rating > 0 ? `${item.rating.toFixed(1)} / 5` : "No ratings yet"}</p>
-      <Link href={`/item/${item._id}`} style={{ display: "inline-block", marginTop: "8px" }}>
-        View Details
-      </Link>
-    </div>
+    <Link href={`/item/${item._id}`} className="item-card">
+      {/* Image */}
+      <div style={{ width: "100%", height: "220px", background: "#1a1a1a", overflow: "hidden" }}>
+        {item.image ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={item.image}
+            alt={item.name}
+            style={{ width: "100%", height: "100%", objectFit: "cover" }}
+          />
+        ) : (
+          <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", color: "#555" }}>
+            No image
+          </div>
+        )}
+      </div>
+
+      {/* Card body */}
+      <div style={{ padding: "10px 12px" }}>
+        <p style={{ margin: "0 0 8px", fontWeight: 600, fontSize: "0.95em", lineHeight: 1.3 }}>
+          {item.name}
+        </p>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "0.9em", color: "#aaa" }}>
+          <span>{item.currency}{item.price}</span>
+          <span>★ {ratingDisplay}</span>
+        </div>
+      </div>
+    </Link>
   );
 }
 
@@ -66,7 +80,8 @@ export default function ItemList({ items }: { items: Item[] }) {
 
   return (
     <div>
-      <div style={{ display: "flex", gap: "8px", marginBottom: "16px", flexWrap: "wrap" }}>
+      {/* Category filter */}
+      <div style={{ display: "flex", gap: "8px", marginBottom: "20px", flexWrap: "wrap" }}>
         {CATEGORIES.map((cat) => (
           <button
             key={cat.value}
@@ -81,7 +96,11 @@ export default function ItemList({ items }: { items: Item[] }) {
       {filtered.length === 0 ? (
         <p>No items in this category.</p>
       ) : (
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: "16px" }}>
+        <div style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))",
+          gap: "20px",
+        }}>
           {filtered.map((item) => (
             <ItemCard key={item._id} item={item} />
           ))}
