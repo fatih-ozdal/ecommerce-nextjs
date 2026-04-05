@@ -29,6 +29,9 @@ export default function AuthBar({
       {session.role === "user" && (
         <Link href="/user" style={{ marginRight: "8px" }}>My Profile</Link>
       )}
+      {session.role === "admin" && (
+        <Link href="/admin" style={{ marginRight: "8px" }}>Admin Dashboard</Link>
+      )}
       <button onClick={handleLogout}>Logout</button>
     </span>
   );
