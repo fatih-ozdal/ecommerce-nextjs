@@ -26,6 +26,9 @@ export default function AuthBar({
   return (
     <span>
       {session.username} ({session.role}){" "}
+      {session.role === "user" && (
+        <Link href="/user" style={{ marginRight: "8px" }}>My Profile</Link>
+      )}
       <button onClick={handleLogout}>Logout</button>
     </span>
   );
