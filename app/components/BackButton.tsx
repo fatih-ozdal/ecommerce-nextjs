@@ -9,7 +9,7 @@ export default function BackButton() {
   if (pathname === "/") return null;
 
   return (
-    <button onClick={() => router.back()} style={{ margin: "8px 16px" }}>
+    <button onClick={() => router.back()}>
       Go Back
     </button>
   );

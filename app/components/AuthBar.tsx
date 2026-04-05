@@ -20,19 +20,19 @@ export default function AuthBar({
   }
 
   if (!session) {
-    return <Link href={`/login?callbackUrl=${encodeURIComponent(callbackUrl)}`}>Login</Link>;
+    return <Link href={`/login?callbackUrl=${encodeURIComponent(callbackUrl)}`} className="nav-btn">Login</Link>;
   }
 
   return (
-    <span>
-      {session.username} ({session.role}){" "}
+    <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+      <span style={{ color: "#aaa", fontSize: "0.9em" }}>{session.username} ({session.role})</span>
       {session.role === "user" && (
-        <Link href="/user" style={{ marginRight: "8px" }}>My Profile</Link>
+        <Link href="/user" className="nav-btn">My Profile</Link>
       )}
       {session.role === "admin" && (
-        <Link href="/admin" style={{ marginRight: "8px" }}>Admin Dashboard</Link>
+        <Link href="/admin" className="nav-btn">Admin Dashboard</Link>
       )}
-      <button onClick={handleLogout}>Logout</button>
+      <button className="nav-btn" onClick={handleLogout}>Logout</button>
     </span>
   );
 }
