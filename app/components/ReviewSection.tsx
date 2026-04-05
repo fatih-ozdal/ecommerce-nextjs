@@ -122,9 +122,6 @@ export default function ReviewSection({ itemId, session, reviews }: Props) {
       {/* Create form — shown only when logged in and no existing review */}
       {session && !ownReview && (
         <div style={{ marginBottom: "16px" }}>
-          <p>
-            <strong>Leave a review</strong> (as {session.username})
-          </p>
           <ReviewForm itemId={itemId} onSuccess={handleSuccess} />
         </div>
       )}
