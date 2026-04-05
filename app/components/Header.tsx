@@ -35,7 +35,7 @@ export default async function Header() {
 
       {/* Center: Logo */}
       <Link href="/" style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <Image src="/logo.png" alt="Fatihbaba" height={40} width={160} style={{ objectFit: "contain" }} />
+        <Image src="/logo.png" alt="Fatihbaba" height={40} width={160} style={{ objectFit: "contain", height: "auto" }} />
       </Link>
 
       {/* Right: Auth/nav */}
