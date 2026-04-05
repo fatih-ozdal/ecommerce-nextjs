@@ -51,7 +51,6 @@ export async function POST(req: NextRequest) {
       reviews: [],
     };
 
-    // Optional fields — only include if provided
     if (body.description) item.description = body.description;
     if (body.image) item.image = body.image;
     if (body.age) item.age = Number(body.age);
@@ -83,7 +82,6 @@ export async function DELETE(req: NextRequest) {
     const client = await clientPromise;
     const db = client.db("Fatihbaba");
 
-    // Remove this item's review from every user's reviews array
     await db.collection("users").updateMany(
       { "reviews.itemId": itemId },
       { $pull: { reviews: { itemId } } } as object

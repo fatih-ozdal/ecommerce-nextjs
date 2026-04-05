@@ -78,7 +78,6 @@ export default async function ItemPage({ params }: { params: Promise<{ id: strin
   return (
     <main style={{ maxWidth: "900px", margin: "0 auto", padding: "32px 16px" }}>
 
-      {/* ── Top section: image + details ── */}
       <div style={{
         display: "grid",
         gridTemplateColumns: "1fr 1fr",
@@ -86,7 +85,6 @@ export default async function ItemPage({ params }: { params: Promise<{ id: strin
         marginBottom: "40px",
         alignItems: "start",
       }}>
-        {/* Left: image */}
         <div style={{
           background: "#1a1a1a",
           borderRadius: "8px",
@@ -107,7 +105,6 @@ export default async function ItemPage({ params }: { params: Promise<{ id: strin
           )}
         </div>
 
-        {/* Right: details */}
         <div>
           <h1 style={{ margin: "0 0 6px", fontSize: "1.5em", fontWeight: 700, lineHeight: 1.2 }}>
             {item.name}
@@ -141,7 +138,6 @@ export default async function ItemPage({ params }: { params: Promise<{ id: strin
         </div>
       </div>
 
-      {/* ── Bottom section: reviews ── */}
       <div style={{ borderTop: "1px solid #2a2a2a", paddingTop: "32px" }}>
         <ReviewSection
           itemId={item._id}

@@ -4,8 +4,6 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { UserEntry, ItemEntry } from "@/app/admin/page";
 
-// ── constants ──────────────────────────────────────────────────────────────
-
 const CATEGORIES = [
   "vinyl",
   "antique_furniture",
@@ -31,8 +29,6 @@ const emptyItemForm = {
   seller: "", image: "", category: "vinyl", condition: "new",
   age: "", material: "", batteryLife: "", size: "",
 };
-
-// ── shared style helpers ───────────────────────────────────────────────────
 
 const card: React.CSSProperties = {
   background: "#161616",
@@ -64,7 +60,7 @@ const inputStyle: React.CSSProperties = {
   fontSize: "0.92em",
   width: "100%",
   boxSizing: "border-box",
-  // Remove number spinners via appearance (applied inline — CSS class needed for ::-webkit-* but inline covers most)
+  // Firefox spinner removal; Chrome/Safari handled via globals.css
   MozAppearance: "textfield",
 };
 
@@ -98,8 +94,6 @@ const deleteBtnStyle: React.CSSProperties = {
   cursor: "pointer",
 };
 
-// ── sub-components ─────────────────────────────────────────────────────────
-
 function Field({
   label, children,
 }: { label: string; children: React.ReactNode }) {
@@ -118,8 +112,6 @@ function Msg({ text, isError }: { text: string; isError?: boolean }) {
     </p>
   );
 }
-
-// ── main component ─────────────────────────────────────────────────────────
 
 export default function AdminDashboard({ users, items }: { users: UserEntry[]; items: ItemEntry[] }) {
   const router = useRouter();
@@ -140,8 +132,6 @@ export default function AdminDashboard({ users, items }: { users: UserEntry[]; i
   function handleCategoryChange(category: string) {
     setItemForm({ ...itemForm, category, age: "", material: "", batteryLife: "", size: "" });
   }
-
-  // ── handlers ────────────────────────────────────────────────────────────
 
   async function handleAddUser(e: React.SyntheticEvent) {
     e.preventDefault();
@@ -199,8 +189,6 @@ export default function AdminDashboard({ users, items }: { users: UserEntry[]; i
     router.refresh();
   }
 
-  // ── render ───────────────────────────────────────────────────────────────
-
   const activeTabStyle: React.CSSProperties = {
     padding: "8px 20px",
     background: "transparent",
@@ -225,7 +213,6 @@ export default function AdminDashboard({ users, items }: { users: UserEntry[]; i
 
   return (
     <div>
-      {/* Tab bar */}
       <div style={{ display: "flex", borderBottom: "1px solid #2a2a2a", marginBottom: "24px", gap: "4px" }}>
         <button style={tab === "users" ? activeTabStyle : inactiveTabStyle} onClick={() => setTab("users")}>
           Manage Users
@@ -235,12 +222,10 @@ export default function AdminDashboard({ users, items }: { users: UserEntry[]; i
         </button>
       </div>
 
-      {/* ── Users tab ── */}
       {tab === "users" && (
         <div>
           {userMsg && <Msg text={userMsg} isError={userIsError} />}
 
-          {/* User list */}
           <div style={card}>
             <h2 style={{ margin: "0 0 16px", fontSize: "1em", fontWeight: 600 }}>Users</h2>
             <table style={{ width: "100%", borderCollapse: "collapse" }}>
@@ -279,7 +264,6 @@ export default function AdminDashboard({ users, items }: { users: UserEntry[]; i
             </table>
           </div>
 
-          {/* Add user form */}
           <div style={card}>
             <h2 style={{ margin: "0 0 16px", fontSize: "1em", fontWeight: 600 }}>Add User</h2>
             <form onSubmit={handleAddUser} style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px" }}>
@@ -308,12 +292,10 @@ export default function AdminDashboard({ users, items }: { users: UserEntry[]; i
         </div>
       )}
 
-      {/* ── Items tab ── */}
       {tab === "items" && (
         <div>
           {itemMsg && <Msg text={itemMsg} isError={itemIsError} />}
 
-          {/* Item list */}
           <div style={card}>
             <h2 style={{ margin: "0 0 16px", fontSize: "1em", fontWeight: 600 }}>Items</h2>
             <table style={{ width: "100%", borderCollapse: "collapse" }}>
@@ -343,12 +325,9 @@ export default function AdminDashboard({ users, items }: { users: UserEntry[]; i
             </table>
           </div>
 
-          {/* Add item form */}
           <div style={card}>
             <h2 style={{ margin: "0 0 16px", fontSize: "1em", fontWeight: 600 }}>Add Item</h2>
             <form onSubmit={handleAddItem} style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px" }}>
-
-              {/* Required fields */}
               <Field label="Name *">
                 <input style={inputStyle} value={itemForm.name} onChange={(e) => setItemForm({ ...itemForm, name: e.target.value })} required />
               </Field>
@@ -375,7 +354,6 @@ export default function AdminDashboard({ users, items }: { users: UserEntry[]; i
                 </select>
               </Field>
 
-              {/* Optional shared fields */}
               <Field label="Description">
                 <input style={inputStyle} value={itemForm.description} onChange={(e) => setItemForm({ ...itemForm, description: e.target.value })} />
               </Field>
@@ -383,7 +361,6 @@ export default function AdminDashboard({ users, items }: { users: UserEntry[]; i
                 <input style={inputStyle} value={itemForm.image} onChange={(e) => setItemForm({ ...itemForm, image: e.target.value })} />
               </Field>
 
-              {/* Category-specific optional fields */}
               {showField("age") && (
                 <Field label="Age (years)">
                   <input style={inputStyle} type="text" inputMode="numeric" value={itemForm.age} onChange={(e) => setItemForm({ ...itemForm, age: e.target.value })} />

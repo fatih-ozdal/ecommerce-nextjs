@@ -11,7 +11,6 @@ function buildUpdatedText(oldText: string, newText: string): string {
 
 export async function POST(req: NextRequest) {
   try {
-    // Verify session
     const jar = await cookies();
     const raw = jar.get("session")?.value;
     if (!raw) {
@@ -45,10 +44,8 @@ export async function POST(req: NextRequest) {
     const existingIndex = reviews.findIndex((r) => r.username === username);
 
     if (existingIndex === -1) {
-      // New review
       reviews.push({ username, text: newText, rating });
     } else {
-      // Update existing review
       const oldText = reviews[existingIndex].text;
       reviews[existingIndex] = {
         username,
@@ -57,17 +54,14 @@ export async function POST(req: NextRequest) {
       };
     }
 
-    // Recalculate aggregate fields
     const numRatings = reviews.length;
     const avgRating = reviews.reduce((sum, r) => sum + r.rating, 0) / numRatings;
 
-    // Update items collection
     await itemsCol.updateOne(
       { _id: new ObjectId(itemId) },
       { $set: { reviews, rating: avgRating, numRatings } }
     );
 
-    // Update users collection: replace this user's review for this item
     const userReview = { itemId, text: reviews[existingIndex === -1 ? reviews.length - 1 : existingIndex].text, rating };
     const userDoc = await usersCol.findOne({ username });
     if (userDoc) {

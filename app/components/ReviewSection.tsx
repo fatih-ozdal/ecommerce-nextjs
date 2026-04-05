@@ -136,7 +136,6 @@ export default function ReviewSection({ itemId, session, reviews }: Props) {
 
   return (
     <div>
-      {/* Add Review section */}
       <h2 style={{ margin: "0 0 12px", fontSize: "1.1em", fontWeight: 600, textAlign: "center" }}>
         Add Review
       </h2>
@@ -156,7 +155,6 @@ export default function ReviewSection({ itemId, session, reviews }: Props) {
         </div>
       )}
 
-      {/* Reviews list */}
       <h2 style={{ margin: "0 0 12px", fontSize: "1.1em", fontWeight: 600 }}>Reviews</h2>
 
       {sorted.length === 0 ? (

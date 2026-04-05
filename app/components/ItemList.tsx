@@ -42,7 +42,6 @@ function ItemCard({ item }: { item: Item }) {
 
   return (
     <Link href={`/item/${item._id}`} className="item-card">
-      {/* Image */}
       <div style={{ width: "100%", height: "220px", background: "#1a1a1a", overflow: "hidden" }}>
         {item.image ? (
           // eslint-disable-next-line @next/next/no-img-element
@@ -58,7 +57,6 @@ function ItemCard({ item }: { item: Item }) {
         )}
       </div>
 
-      {/* Card body */}
       <div style={{ padding: "10px 12px" }}>
         <p style={{ margin: "0 0 8px", fontWeight: 600, fontSize: "0.95em", lineHeight: 1.3 }}>
           {item.name}
@@ -80,7 +78,6 @@ export default function ItemList({ items }: { items: Item[] }) {
 
   return (
     <div>
-      {/* Category filter */}
       <div style={{ display: "flex", gap: "8px", marginBottom: "20px", flexWrap: "wrap" }}>
         {CATEGORIES.map((cat) => (
           <button

@@ -28,17 +28,14 @@ export default async function Header() {
       backgroundColor: "#111",
       borderBottom: "1px solid #333",
     }}>
-      {/* Left: Go Back */}
       <div style={{ display: "flex", alignItems: "center" }}>
         <BackButton />
       </div>
 
-      {/* Center: Logo */}
       <Link href="/" style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
         <Image src="/logo.png" alt="Fatihbaba" height={40} width={160} style={{ objectFit: "contain", height: "auto" }} />
       </Link>
 
-      {/* Right: Auth/nav */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end" }}>
         <AuthBar session={session} callbackUrl="/" />
       </div>

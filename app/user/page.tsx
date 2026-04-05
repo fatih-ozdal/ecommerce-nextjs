@@ -83,13 +83,11 @@ export default async function UserPage() {
 
   return (
     <main style={{ maxWidth: "720px", margin: "0 auto", padding: "32px 16px" }}>
-      {/* Page heading */}
       <div style={{ marginBottom: "28px" }}>
         <h1 style={{ margin: "0 0 4px", fontSize: "1.6em", fontWeight: 700 }}>My Profile</h1>
         <p style={{ margin: 0, color: "#888", fontSize: "0.9em" }}>Your account summary and reviews</p>
       </div>
 
-      {/* Stat cards */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "12px", marginBottom: "36px" }}>
         <StatCard label="Username" value={user.username} />
         <StatCard
@@ -99,7 +97,6 @@ export default async function UserPage() {
         <StatCard label="Reviews Written" value={String(reviews.length)} />
       </div>
 
-      {/* Reviews section */}
       <h2 style={{ margin: "0 0 16px", fontSize: "1.1em", fontWeight: 600 }}>My Reviews</h2>
 
       {reviews.length === 0 ? (

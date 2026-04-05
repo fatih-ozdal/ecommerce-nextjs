@@ -62,7 +62,6 @@ export async function DELETE(req: NextRequest) {
     const client = await clientPromise;
     const db = client.db("Fatihbaba");
 
-    // Remove this user's reviews from all items and recalculate rating/numRatings
     const items = await db
       .collection("items")
       .find({ "reviews.username": username })
