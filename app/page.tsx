@@ -1,4 +1,5 @@
 import { cookies } from "next/headers";
+import clientPromise from "@/lib/mongodb";
 import AuthBar from "./components/AuthBar";
 import ItemList, { type Item } from "./components/ItemList";
 
@@ -15,14 +16,14 @@ async function getSession(): Promise<Session | null> {
 }
 
 async function getItems(): Promise<Item[]> {
-  const res = await fetch("http://localhost:3000/api/items", { cache: "no-store" });
-  if (!res.ok) throw new Error("Failed to fetch items");
-  return res.json();
+  const client = await clientPromise;
+  const db = client.db("Fatihbaba");
+  const docs = await db.collection("items").find({}).toArray();
+  return docs.map((doc) => ({ ...doc, _id: doc._id.toString() })) as Item[];
 }
 
 export default async function Home() {
-  const session = await getSession();
-  const items = await getItems();
+  const [session, items] = await Promise.all([getSession(), getItems()]);
 
   return (
     <main>
