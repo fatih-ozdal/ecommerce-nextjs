@@ -39,8 +39,6 @@ export async function POST(req: NextRequest) {
       password,
       email,
       role,
-      averageRating: 0,
-      ratings: {},
       reviews: [],
     });
 
