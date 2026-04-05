@@ -1,5 +1,9 @@
 import { ObjectId } from "mongodb";
+import { cookies } from "next/headers";
 import clientPromise from "@/lib/mongodb";
+import ReviewSection from "@/app/components/ReviewSection";
+
+type Session = { username: string; role: string };
 
 type Review = {
   username: string;
@@ -26,6 +30,16 @@ type Item = {
   size?: string;
 };
 
+async function getSession(): Promise<Session | null> {
+  try {
+    const jar = await cookies();
+    const raw = jar.get("session")?.value;
+    return raw ? (JSON.parse(raw) as Session) : null;
+  } catch {
+    return null;
+  }
+}
+
 async function getItem(id: string): Promise<Item | null> {
   if (!ObjectId.isValid(id)) return null;
 
@@ -47,7 +61,7 @@ function Field({ label, value }: { label: string; value: string | number }) {
 
 export default async function ItemPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const item = await getItem(id);
+  const [item, session] = await Promise.all([getItem(id), getSession()]);
 
   if (!item) {
     return (
@@ -83,19 +97,11 @@ export default async function ItemPage({ params }: { params: Promise<{ id: strin
       {item.batteryLife && <Field label="Battery Life" value={item.batteryLife} />}
       {item.size && <Field label="Size" value={item.size} />}
 
-      <h2 style={{ marginTop: "24px" }}>Reviews</h2>
-      {reviewCount === 0 ? (
-        <p>No reviews yet.</p>
-      ) : (
-        <ul style={{ listStyle: "none", padding: 0 }}>
-          {item.reviews.map((review, i) => (
-            <li key={i} style={{ borderTop: "1px solid #ddd", padding: "8px 0" }}>
-              <strong>{review.username}</strong> — {review.rating}/5
-              <p style={{ margin: "4px 0 0" }}>{review.text}</p>
-            </li>
-          ))}
-        </ul>
-      )}
+      <ReviewSection
+        itemId={item._id}
+        session={session}
+        reviews={item.reviews ?? []}
+      />
     </main>
   );
 }
