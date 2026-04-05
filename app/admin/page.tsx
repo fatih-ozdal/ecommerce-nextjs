@@ -66,7 +66,14 @@ export default async function AdminPage() {
 
   return (
     <main style={{ maxWidth: "900px", margin: "0 auto", padding: "16px" }}>
-      <h1>Admin Dashboard</h1>
+      <h1
+        style={{
+          textAlign: "center",
+          fontSize: "32px",
+          fontWeight: 700,
+          marginBottom: "24px",
+        }}
+      > Admin Dashboard</h1>
       <AdminDashboard users={users} items={items} />
     </main>
   );
