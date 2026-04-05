@@ -20,7 +20,6 @@ export type Item = {
   condition: string;
   rating: number;
   numRatings: number;
-  ratings: Record<string, number>;
   reviews: Review[];
   age?: number;
   material?: string;
