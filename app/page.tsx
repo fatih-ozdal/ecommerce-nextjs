@@ -1,3 +1,4 @@
+import Link from "next/link";
 import ItemList, { type Item } from "./components/ItemList";
 
 async function getItems(): Promise<Item[]> {
@@ -11,7 +12,10 @@ export default async function Home() {
 
   return (
     <main>
-      <h1>E-Commerce App</h1>
+      <div>
+        <h1>E-Commerce App</h1>
+        <Link href="/login?callbackUrl=/">Login</Link>
+      </div>
       <ItemList items={items} />
     </main>
   );
