@@ -4,34 +4,46 @@ import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 
-function LoginForm() {
+function AuthForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") ?? "/";
 
+  const [mode, setMode] = useState<"login" | "register">("login");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("");
   const [error, setError] = useState("");
 
   async function handleSubmit(e: React.SyntheticEvent) {
     e.preventDefault();
     setError("");
 
-    const res = await fetch("/api/login", {
+    const endpoint = mode === "login" ? "/api/login" : "/api/register";
+    const body = mode === "login"
+      ? { username, password }
+      : { username, password, email };
+
+    const res = await fetch(endpoint, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, password }),
+      body: JSON.stringify(body),
     });
 
     const data = await res.json();
 
     if (!res.ok) {
-      setError(data.error ?? "Login failed");
+      setError(data.error ?? `${mode === "login" ? "Login" : "Registration"} failed`);
       return;
     }
 
     router.push(callbackUrl);
     router.refresh();
+  }
+
+  function switchMode() {
+    setMode(mode === "login" ? "register" : "login");
+    setError("");
   }
 
   return (
@@ -54,8 +66,25 @@ function LoginForm() {
           required
         />
       </div>
+      {mode === "register" && (
+        <div>
+          <label>Email</label>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+        </div>
+      )}
       {error && <p>{error}</p>}
-      <button type="submit">Login</button>
+      <button type="submit">{mode === "login" ? "Login" : "Register"}</button>
+      <p>
+        {mode === "login" ? "No account?" : "Already have an account?"}{" "}
+        <button type="button" onClick={switchMode}>
+          {mode === "login" ? "Register" : "Back to Login"}
+        </button>
+      </p>
     </form>
   );
 }
@@ -65,7 +94,7 @@ export default function LoginPage() {
     <main>
       <h1>Login</h1>
       <Suspense>
-        <LoginForm />
+        <AuthForm />
       </Suspense>
     </main>
   );
