@@ -4,6 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { UserEntry, ItemEntry } from "@/app/admin/page";
 
+// ── constants ──────────────────────────────────────────────────────────────
+
 const CATEGORIES = [
   "vinyl",
   "antique_furniture",
@@ -12,7 +14,8 @@ const CATEGORIES = [
   "camping_tent",
 ];
 
-// Declares which category-specific fields are relevant per category
+const CURRENCIES = ["TRY", "USD", "EUR"];
+
 const CATEGORY_FIELDS: Record<string, Array<"age" | "material" | "batteryLife" | "size">> = {
   vinyl:             ["age"],
   antique_furniture: ["age", "material"],
@@ -24,119 +27,210 @@ const CATEGORY_FIELDS: Record<string, Array<"age" | "material" | "batteryLife" |
 const emptyUserForm = { username: "", password: "", email: "", role: "user" };
 
 const emptyItemForm = {
-  name: "",
-  description: "",
-  price: "",
-  currency: "$",
-  seller: "",
-  image: "",
-  category: "vinyl",
-  condition: "new",
-  age: "",
-  material: "",
-  batteryLife: "",
-  size: "",
+  name: "", description: "", price: "", currency: "USD",
+  seller: "", image: "", category: "vinyl", condition: "new",
+  age: "", material: "", batteryLife: "", size: "",
 };
 
-export default function AdminDashboard({
-  users,
-  items,
-}: {
-  users: UserEntry[];
-  items: ItemEntry[];
-}) {
+// ── shared style helpers ───────────────────────────────────────────────────
+
+const card: React.CSSProperties = {
+  background: "#161616",
+  border: "1px solid #2a2a2a",
+  borderRadius: "8px",
+  padding: "20px 24px",
+  marginBottom: "20px",
+};
+
+const fieldStyle: React.CSSProperties = {
+  display: "flex",
+  flexDirection: "column",
+  gap: "5px",
+};
+
+const labelStyle: React.CSSProperties = {
+  fontSize: "0.82em",
+  color: "#888",
+  textTransform: "uppercase",
+  letterSpacing: "0.04em",
+};
+
+const inputStyle: React.CSSProperties = {
+  padding: "8px 10px",
+  borderRadius: "4px",
+  border: "1px solid #333",
+  background: "#0f0f0f",
+  color: "#ededed",
+  fontSize: "0.92em",
+  width: "100%",
+  boxSizing: "border-box",
+  // Remove number spinners via appearance (applied inline — CSS class needed for ::-webkit-* but inline covers most)
+  MozAppearance: "textfield",
+};
+
+const selectStyle: React.CSSProperties = { ...inputStyle };
+
+const thStyle: React.CSSProperties = {
+  textAlign: "left",
+  padding: "8px 12px",
+  fontSize: "0.78em",
+  color: "#888",
+  textTransform: "uppercase",
+  letterSpacing: "0.04em",
+  borderBottom: "1px solid #2a2a2a",
+  fontWeight: 500,
+};
+
+const tdStyle: React.CSSProperties = {
+  padding: "10px 12px",
+  fontSize: "0.9em",
+  borderBottom: "1px solid #1e1e1e",
+  verticalAlign: "middle",
+};
+
+const deleteBtnStyle: React.CSSProperties = {
+  padding: "4px 12px",
+  fontSize: "0.8em",
+  border: "1px solid #554444",
+  borderRadius: "4px",
+  background: "transparent",
+  color: "#cc6666",
+  cursor: "pointer",
+};
+
+// ── sub-components ─────────────────────────────────────────────────────────
+
+function Field({
+  label, children,
+}: { label: string; children: React.ReactNode }) {
+  return (
+    <div style={fieldStyle}>
+      <label style={labelStyle}>{label}</label>
+      {children}
+    </div>
+  );
+}
+
+function Msg({ text, isError }: { text: string; isError?: boolean }) {
+  return (
+    <p style={{ margin: "0 0 12px", fontSize: "0.88em", color: isError ? "#cc6666" : "#66bb66" }}>
+      {text}
+    </p>
+  );
+}
+
+// ── main component ─────────────────────────────────────────────────────────
+
+export default function AdminDashboard({ users, items }: { users: UserEntry[]; items: ItemEntry[] }) {
   const router = useRouter();
   const [tab, setTab] = useState<"users" | "items">("users");
 
   const [userForm, setUserForm] = useState(emptyUserForm);
   const [userMsg, setUserMsg] = useState("");
+  const [userIsError, setUserIsError] = useState(false);
 
   const [itemForm, setItemForm] = useState(emptyItemForm);
   const [itemMsg, setItemMsg] = useState("");
+  const [itemIsError, setItemIsError] = useState(false);
 
-  // Returns true if the given optional field is relevant for the currently selected category
   function showField(field: "age" | "material" | "batteryLife" | "size") {
     return CATEGORY_FIELDS[itemForm.category]?.includes(field) ?? false;
   }
 
-  // When category changes, reset all category-specific fields to prevent stale values being submitted
   function handleCategoryChange(category: string) {
-    setItemForm({
-      ...itemForm,
-      category,
-      age: "",
-      material: "",
-      batteryLife: "",
-      size: "",
-    });
+    setItemForm({ ...itemForm, category, age: "", material: "", batteryLife: "", size: "" });
   }
 
-  // --- User handlers ---
+  // ── handlers ────────────────────────────────────────────────────────────
+
   async function handleAddUser(e: React.SyntheticEvent) {
     e.preventDefault();
-    setUserMsg("");
     const res = await fetch("/api/users", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(userForm),
     });
     const data = await res.json();
-    if (!res.ok) { setUserMsg(data.error ?? "Failed to add user."); return; }
+    if (!res.ok) { setUserIsError(true); setUserMsg(data.error ?? "Failed to add user."); return; }
     setUserForm(emptyUserForm);
-    setUserMsg("User added.");
+    setUserIsError(false);
+    setUserMsg("User added successfully.");
     router.refresh();
   }
 
   async function handleDeleteUser(username: string) {
-    setUserMsg("");
     const res = await fetch("/api/users", {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username }),
     });
     const data = await res.json();
-    if (!res.ok) { setUserMsg(data.error ?? "Failed to delete user."); return; }
+    if (!res.ok) { setUserIsError(true); setUserMsg(data.error ?? "Failed to delete user."); return; }
+    setUserIsError(false);
     setUserMsg(`User "${username}" deleted.`);
     router.refresh();
   }
 
-  // --- Item handlers ---
   async function handleAddItem(e: React.SyntheticEvent) {
     e.preventDefault();
-    setItemMsg("");
     const res = await fetch("/api/items", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(itemForm),
     });
     const data = await res.json();
-    if (!res.ok) { setItemMsg(data.error ?? "Failed to add item."); return; }
+    if (!res.ok) { setItemIsError(true); setItemMsg(data.error ?? "Failed to add item."); return; }
     setItemForm(emptyItemForm);
-    setItemMsg("Item added.");
+    setItemIsError(false);
+    setItemMsg("Item added successfully.");
     router.refresh();
   }
 
   async function handleDeleteItem(itemId: string) {
-    setItemMsg("");
     const res = await fetch("/api/items", {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ itemId }),
     });
     const data = await res.json();
-    if (!res.ok) { setItemMsg(data.error ?? "Failed to delete item."); return; }
+    if (!res.ok) { setItemIsError(true); setItemMsg(data.error ?? "Failed to delete item."); return; }
+    setItemIsError(false);
     setItemMsg("Item deleted.");
     router.refresh();
   }
 
+  // ── render ───────────────────────────────────────────────────────────────
+
+  const activeTabStyle: React.CSSProperties = {
+    padding: "8px 20px",
+    background: "transparent",
+    color: "#ededed",
+    border: "none",
+    borderBottom: "2px solid #e8a020",
+    cursor: "default",
+    fontWeight: 600,
+    fontSize: "0.95em",
+  };
+
+  const inactiveTabStyle: React.CSSProperties = {
+    padding: "8px 20px",
+    background: "transparent",
+    color: "#888",
+    border: "none",
+    borderBottom: "2px solid transparent",
+    cursor: "pointer",
+    fontWeight: 400,
+    fontSize: "0.95em",
+  };
+
   return (
     <div>
-      {/* Tabs */}
-      <div style={{ marginBottom: "16px" }}>
-        <button onClick={() => setTab("users")} disabled={tab === "users"} style={{ marginRight: "8px" }}>
+      {/* Tab bar */}
+      <div style={{ display: "flex", borderBottom: "1px solid #2a2a2a", marginBottom: "24px", gap: "4px" }}>
+        <button style={tab === "users" ? activeTabStyle : inactiveTabStyle} onClick={() => setTab("users")}>
           Manage Users
         </button>
-        <button onClick={() => setTab("items")} disabled={tab === "items"}>
+        <button style={tab === "items" ? activeTabStyle : inactiveTabStyle} onClick={() => setTab("items")}>
           Manage Items
         </button>
       </div>
@@ -144,142 +238,180 @@ export default function AdminDashboard({
       {/* ── Users tab ── */}
       {tab === "users" && (
         <div>
-          {userMsg && <p>{userMsg}</p>}
+          {userMsg && <Msg text={userMsg} isError={userIsError} />}
 
-          <h2>Users</h2>
-          <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: "24px" }}>
-            <thead>
-              <tr>
-                <th style={{ textAlign: "left" }}>Username</th>
-                <th style={{ textAlign: "left" }}>Email</th>
-                <th style={{ textAlign: "left" }}>Role</th>
-                <th />
-              </tr>
-            </thead>
-            <tbody>
-              {users.map((u) => (
-                <tr key={u.username} style={{ borderTop: "1px solid #ddd" }}>
-                  <td style={{ padding: "6px 0" }}>{u.username}</td>
-                  <td style={{ padding: "6px 0" }}>{u.email}</td>
-                  <td style={{ padding: "6px 0" }}>{u.role}</td>
-                  <td style={{ padding: "6px 0" }}>
-                    <button onClick={() => handleDeleteUser(u.username)}>Delete</button>
-                  </td>
+          {/* User list */}
+          <div style={card}>
+            <h2 style={{ margin: "0 0 16px", fontSize: "1em", fontWeight: 600 }}>Users</h2>
+            <table style={{ width: "100%", borderCollapse: "collapse" }}>
+              <thead>
+                <tr>
+                  <th style={thStyle}>Username</th>
+                  <th style={thStyle}>Email</th>
+                  <th style={thStyle}>Role</th>
+                  <th style={{ ...thStyle, textAlign: "right" }}>Action</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {users.length === 0 && (
+                  <tr><td colSpan={4} style={{ ...tdStyle, color: "#555", textAlign: "center" }}>No users found.</td></tr>
+                )}
+                {users.map((u) => (
+                  <tr key={u.username}>
+                    <td style={tdStyle}>{u.username}</td>
+                    <td style={{ ...tdStyle, color: "#888" }}>{u.email}</td>
+                    <td style={tdStyle}>
+                      <span style={{
+                        display: "inline-block", padding: "2px 8px", borderRadius: "4px",
+                        fontSize: "0.78em", fontWeight: 600,
+                        background: u.role === "admin" ? "#2a1a00" : "#0f1f0f",
+                        color: u.role === "admin" ? "#e8a020" : "#66bb66",
+                      }}>
+                        {u.role}
+                      </span>
+                    </td>
+                    <td style={{ ...tdStyle, textAlign: "right" }}>
+                      <button style={deleteBtnStyle} onClick={() => handleDeleteUser(u.username)}>Delete</button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
 
-          <h2>Add User</h2>
-          <form onSubmit={handleAddUser}>
-            <div><label>Username&nbsp;
-              <input value={userForm.username} onChange={(e) => setUserForm({ ...userForm, username: e.target.value })} required />
-            </label></div>
-            <div><label>Password&nbsp;
-              <input type="password" value={userForm.password} onChange={(e) => setUserForm({ ...userForm, password: e.target.value })} required />
-            </label></div>
-            <div><label>Email&nbsp;
-              <input type="email" value={userForm.email} onChange={(e) => setUserForm({ ...userForm, email: e.target.value })} required />
-            </label></div>
-            <div><label>Role&nbsp;
-              <select value={userForm.role} onChange={(e) => setUserForm({ ...userForm, role: e.target.value })}>
-                <option value="user">user</option>
-                <option value="admin">admin</option>
-              </select>
-            </label></div>
-            <button type="submit" style={{ marginTop: "8px" }}>Add User</button>
-          </form>
+          {/* Add user form */}
+          <div style={card}>
+            <h2 style={{ margin: "0 0 16px", fontSize: "1em", fontWeight: 600 }}>Add User</h2>
+            <form onSubmit={handleAddUser} style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px" }}>
+              <Field label="Username">
+                <input style={inputStyle} value={userForm.username} onChange={(e) => setUserForm({ ...userForm, username: e.target.value })} required />
+              </Field>
+              <Field label="Password">
+                <input style={inputStyle} type="password" value={userForm.password} onChange={(e) => setUserForm({ ...userForm, password: e.target.value })} required />
+              </Field>
+              <Field label="Email">
+                <input style={inputStyle} type="email" value={userForm.email} onChange={(e) => setUserForm({ ...userForm, email: e.target.value })} required />
+              </Field>
+              <Field label="Role">
+                <select style={selectStyle} value={userForm.role} onChange={(e) => setUserForm({ ...userForm, role: e.target.value })}>
+                  <option value="user">user</option>
+                  <option value="admin">admin</option>
+                </select>
+              </Field>
+              <div style={{ gridColumn: "1 / -1" }}>
+                <button type="submit" style={{ padding: "9px 24px", borderRadius: "4px", background: "#e8a020", color: "#111", border: "none", fontWeight: 600, cursor: "pointer", fontSize: "0.9em" }}>
+                  Add User
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
 
       {/* ── Items tab ── */}
       {tab === "items" && (
         <div>
-          {itemMsg && <p>{itemMsg}</p>}
+          {itemMsg && <Msg text={itemMsg} isError={itemIsError} />}
 
-          <h2>Items</h2>
-          <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: "24px" }}>
-            <thead>
-              <tr>
-                <th style={{ textAlign: "left" }}>Name</th>
-                <th style={{ textAlign: "left" }}>Category</th>
-                <th style={{ textAlign: "left" }}>Price</th>
-                <th />
-              </tr>
-            </thead>
-            <tbody>
-              {items.map((item) => (
-                <tr key={item._id} style={{ borderTop: "1px solid #ddd" }}>
-                  <td style={{ padding: "6px 0" }}>{item.name}</td>
-                  <td style={{ padding: "6px 0" }}>{item.category}</td>
-                  <td style={{ padding: "6px 0" }}>{item.currency}{item.price}</td>
-                  <td style={{ padding: "6px 0" }}>
-                    <button onClick={() => handleDeleteItem(item._id)}>Delete</button>
-                  </td>
+          {/* Item list */}
+          <div style={card}>
+            <h2 style={{ margin: "0 0 16px", fontSize: "1em", fontWeight: 600 }}>Items</h2>
+            <table style={{ width: "100%", borderCollapse: "collapse" }}>
+              <thead>
+                <tr>
+                  <th style={thStyle}>Name</th>
+                  <th style={thStyle}>Category</th>
+                  <th style={thStyle}>Price</th>
+                  <th style={{ ...thStyle, textAlign: "right" }}>Action</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {items.length === 0 && (
+                  <tr><td colSpan={4} style={{ ...tdStyle, color: "#555", textAlign: "center" }}>No items found.</td></tr>
+                )}
+                {items.map((item) => (
+                  <tr key={item._id}>
+                    <td style={tdStyle}>{item.name}</td>
+                    <td style={{ ...tdStyle, color: "#888" }}>{item.category}</td>
+                    <td style={tdStyle}>{item.currency} {item.price}</td>
+                    <td style={{ ...tdStyle, textAlign: "right" }}>
+                      <button style={deleteBtnStyle} onClick={() => handleDeleteItem(item._id)}>Delete</button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
 
-          <h2>Add Item</h2>
-          <form onSubmit={handleAddItem}>
-            {/* Required shared fields */}
-            <div><label>Name&nbsp;
-              <input value={itemForm.name} onChange={(e) => setItemForm({ ...itemForm, name: e.target.value })} required />
-            </label></div>
-            <div><label>Price&nbsp;
-              <input type="number" min="0" step="0.01" value={itemForm.price} onChange={(e) => setItemForm({ ...itemForm, price: e.target.value })} required />
-            </label></div>
-            <div><label>Currency&nbsp;
-              <input value={itemForm.currency} onChange={(e) => setItemForm({ ...itemForm, currency: e.target.value })} required />
-            </label></div>
-            <div><label>Seller&nbsp;
-              <input value={itemForm.seller} onChange={(e) => setItemForm({ ...itemForm, seller: e.target.value })} required />
-            </label></div>
-            <div><label>Category&nbsp;
-              <select value={itemForm.category} onChange={(e) => handleCategoryChange(e.target.value)}>
-                {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
-              </select>
-            </label></div>
-            <div><label>Condition&nbsp;
-              <select value={itemForm.condition} onChange={(e) => setItemForm({ ...itemForm, condition: e.target.value })}>
-                <option value="new">new</option>
-                <option value="used">used</option>
-              </select>
-            </label></div>
+          {/* Add item form */}
+          <div style={card}>
+            <h2 style={{ margin: "0 0 16px", fontSize: "1em", fontWeight: 600 }}>Add Item</h2>
+            <form onSubmit={handleAddItem} style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px" }}>
 
-            {/* Optional shared fields */}
-            <div><label>Description&nbsp;
-              <input value={itemForm.description} onChange={(e) => setItemForm({ ...itemForm, description: e.target.value })} />
-            </label></div>
-            <div><label>Image URL&nbsp;
-              <input value={itemForm.image} onChange={(e) => setItemForm({ ...itemForm, image: e.target.value })} />
-            </label></div>
+              {/* Required fields */}
+              <Field label="Name *">
+                <input style={inputStyle} value={itemForm.name} onChange={(e) => setItemForm({ ...itemForm, name: e.target.value })} required />
+              </Field>
+              <Field label="Seller *">
+                <input style={inputStyle} value={itemForm.seller} onChange={(e) => setItemForm({ ...itemForm, seller: e.target.value })} required />
+              </Field>
+              <Field label="Price *">
+                <input style={inputStyle} type="text" inputMode="decimal" value={itemForm.price} onChange={(e) => setItemForm({ ...itemForm, price: e.target.value })} required />
+              </Field>
+              <Field label="Currency *">
+                <select style={selectStyle} value={itemForm.currency} onChange={(e) => setItemForm({ ...itemForm, currency: e.target.value })}>
+                  {CURRENCIES.map((c) => <option key={c} value={c}>{c}</option>)}
+                </select>
+              </Field>
+              <Field label="Category *">
+                <select style={selectStyle} value={itemForm.category} onChange={(e) => handleCategoryChange(e.target.value)}>
+                  {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
+                </select>
+              </Field>
+              <Field label="Condition *">
+                <select style={selectStyle} value={itemForm.condition} onChange={(e) => setItemForm({ ...itemForm, condition: e.target.value })}>
+                  <option value="new">New</option>
+                  <option value="used">Used</option>
+                </select>
+              </Field>
 
-            {/* Category-specific optional fields */}
-            {showField("age") && (
-              <div><label>Age (years)&nbsp;
-                <input type="number" min="0" value={itemForm.age} onChange={(e) => setItemForm({ ...itemForm, age: e.target.value })} />
-              </label></div>
-            )}
-            {showField("material") && (
-              <div><label>Material&nbsp;
-                <input value={itemForm.material} onChange={(e) => setItemForm({ ...itemForm, material: e.target.value })} />
-              </label></div>
-            )}
-            {showField("batteryLife") && (
-              <div><label>Battery Life&nbsp;
-                <input value={itemForm.batteryLife} onChange={(e) => setItemForm({ ...itemForm, batteryLife: e.target.value })} />
-              </label></div>
-            )}
-            {showField("size") && (
-              <div><label>Size&nbsp;
-                <input value={itemForm.size} onChange={(e) => setItemForm({ ...itemForm, size: e.target.value })} />
-              </label></div>
-            )}
+              {/* Optional shared fields */}
+              <Field label="Description">
+                <input style={inputStyle} value={itemForm.description} onChange={(e) => setItemForm({ ...itemForm, description: e.target.value })} />
+              </Field>
+              <Field label="Image URL">
+                <input style={inputStyle} value={itemForm.image} onChange={(e) => setItemForm({ ...itemForm, image: e.target.value })} />
+              </Field>
 
-            <button type="submit" style={{ marginTop: "8px" }}>Add Item</button>
-          </form>
+              {/* Category-specific optional fields */}
+              {showField("age") && (
+                <Field label="Age (years)">
+                  <input style={inputStyle} type="text" inputMode="numeric" value={itemForm.age} onChange={(e) => setItemForm({ ...itemForm, age: e.target.value })} />
+                </Field>
+              )}
+              {showField("material") && (
+                <Field label="Material">
+                  <input style={inputStyle} value={itemForm.material} onChange={(e) => setItemForm({ ...itemForm, material: e.target.value })} />
+                </Field>
+              )}
+              {showField("batteryLife") && (
+                <Field label="Battery Life">
+                  <input style={inputStyle} value={itemForm.batteryLife} onChange={(e) => setItemForm({ ...itemForm, batteryLife: e.target.value })} />
+                </Field>
+              )}
+              {showField("size") && (
+                <Field label="Size">
+                  <input style={inputStyle} value={itemForm.size} onChange={(e) => setItemForm({ ...itemForm, size: e.target.value })} />
+                </Field>
+              )}
+
+              <div style={{ gridColumn: "1 / -1" }}>
+                <button type="submit" style={{ padding: "9px 24px", borderRadius: "4px", background: "#e8a020", color: "#111", border: "none", fontWeight: 600, cursor: "pointer", fontSize: "0.9em" }}>
+                  Add Item
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
     </div>
