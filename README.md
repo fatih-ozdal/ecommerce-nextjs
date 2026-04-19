@@ -6,7 +6,7 @@ CENG 495 – Cloud Computing | Take Home Exam 1
 
 ## Deployment URL
 
-**[https://YOUR-VERCEL-URL.vercel.app](https://ecommerce-nextjs-eight-sigma.vercel.app/)**
+**[https:///ecommerce-nextjs-eight-sigma.vercel.app](https://ecommerce-nextjs-eight-sigma.vercel.app/)**
 
 
 ---
